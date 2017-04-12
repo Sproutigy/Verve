@@ -56,6 +56,7 @@ public class VerveQuickstart {
         VerveRoot verveRoot = new VerveRoot();
         verveRoot.addListener((eventType, module) -> {
             if (eventType == VerveRootListener.EventType.Initializing) {
+                module.getContext().add(HttpServer.class, httpServer);
                 module.getContext().add(HttpRouter.class, new HttpRouterImpl());
             }
         });
