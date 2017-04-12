@@ -17,6 +17,8 @@ public interface HttpResponse {
 
     Promise<Void> sendFile(String filePath);
 
+    void redirect(String url);
+
     void end(String text);
     void end(Binary data);
     void end();

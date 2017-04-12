@@ -28,6 +28,13 @@ public abstract class AbstractHttpResponse implements HttpResponse {
     }
 
     @Override
+    public void redirect(String url) {
+        status(HttpResponseStatus.TEMPORARY_REDIRECT);
+        setHeader("Location", url);
+        end();
+    }
+
+    @Override
     public void end(String text) {
         Binary data = Binary.fromString(text, StandardCharsets.UTF_8);
         setHeaderIfNotSet(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
