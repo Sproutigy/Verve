@@ -6,7 +6,7 @@ import com.sproutigy.commons.binary.Binary;
 import com.sproutigy.verve.webserver.HttpResponse;
 import com.sproutigy.verve.webserver.impl.AbstractHttpResponse;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerRequest;
@@ -52,13 +52,13 @@ public class VertxHttpResponse extends AbstractHttpResponse {
     public Promise<Void> sendFile(String filePath) {
         Deferred<Void> deferred = Promise.defer();
         finalized = true;
-        asVertxResponse().sendFile(filePath, new AsyncResultHandler<Void>() {
+        asVertxResponse().sendFile(filePath, new Handler<AsyncResult<Void>>() {
             @Override
-            public void handle(AsyncResult<Void> event) {
-                if (event.succeeded()) {
+            public void handle(AsyncResult<Void> result) {
+                if (result.succeeded()) {
                     deferred.resolve();
                 } else {
-                    deferred.reject(event.cause());
+                    deferred.reject(result.cause());
                 }
             }
         });
