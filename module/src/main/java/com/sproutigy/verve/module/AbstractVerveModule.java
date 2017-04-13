@@ -4,11 +4,17 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.multibindings.Multibinder;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 public abstract class AbstractVerveModule extends AbstractModule implements VerveModule {
     private Context context;
+
+    private Map<Object, Multibinder> multibinders = new LinkedHashMap<>();
 
     @Override
     protected final void configure() {
@@ -64,4 +70,27 @@ public abstract class AbstractVerveModule extends AbstractModule implements Verv
     public <T> T getInstance(Key<T> key) {
         return getInjector().getInstance(key);
     }
+
+
+    public <T> void bindSingleton(Class<T> clazz, T instance) {
+        bind(clazz).toInstance(instance);
+    }
+
+    public <T> void bindSingleton(Class<T> clazz) {
+        bind(clazz).asEagerSingleton();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Multibinder<T> multibinder(Class<T> clazz) {
+        return multibinders.computeIfAbsent(clazz, k -> Multibinder.newSetBinder(binder(), clazz));
+    }
+
+    public synchronized <T> void bindMulti(Class<T> clazz, Class<? extends T> clazzInstance) {
+        multibinder(clazz).addBinding().to(clazzInstance);
+    }
+
+    public synchronized <T> void bindMulti(Class<T> clazz, T instance) {
+        multibinder(clazz).addBinding().toInstance(instance);
+    }
+
 }
