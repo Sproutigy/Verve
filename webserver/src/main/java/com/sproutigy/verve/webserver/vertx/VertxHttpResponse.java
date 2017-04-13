@@ -68,11 +68,15 @@ public class VertxHttpResponse extends AbstractHttpResponse {
     @Override
     public void end(Binary data) {
         try {
-            if (data.hasLength()) {
-                setHeaderIfNotSet(HttpHeaders.CONTENT_LENGTH, Long.toString(data.length()));
+            if (data != null) {
+                if (data.hasLength()) {
+                    setHeaderIfNotSet(HttpHeaders.CONTENT_LENGTH, Long.toString(data.length()));
+                }
+                finalized = true;
+                asVertxResponse().end(Buffer.buffer(data.asByteArray()));
+            } else {
+                end();
             }
-            finalized = true;
-            asVertxResponse().end(Buffer.buffer(data.asByteArray()));
         } catch (Throwable e) {
             log.warn("Could not gracefully end response", e);
         }
@@ -89,7 +93,8 @@ public class VertxHttpResponse extends AbstractHttpResponse {
 
         try {
             vertxRequest.resume();
-        } catch (IllegalStateException ignore) { }
+        } catch (IllegalStateException ignore) {
+        }
     }
 
     @Override

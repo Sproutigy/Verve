@@ -36,9 +36,13 @@ public abstract class AbstractHttpResponse implements HttpResponse {
 
     @Override
     public void end(String text) {
-        Binary data = Binary.fromString(text, StandardCharsets.UTF_8);
-        setHeaderIfNotSet(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-        setHeaderIfNotSet(HttpHeaderNames.CONTENT_LENGTH, Long.toString(data.length()));
-        end(data);
+        if (text != null) {
+            Binary data = Binary.fromString(text, StandardCharsets.UTF_8);
+            setHeaderIfNotSet(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+            setHeaderIfNotSet(HttpHeaderNames.CONTENT_LENGTH, Long.toString(data.length()));
+            end(data);
+        } else {
+            end();
+        }
     }
 }
