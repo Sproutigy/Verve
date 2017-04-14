@@ -91,6 +91,11 @@ public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest
     }
 
     @Override
+    public String getRemote() {
+        return asVertxRequest().remoteAddress().host();
+    }
+
+    @Override
     public void close() throws Exception {
         vertxRequest.response().end();
     }

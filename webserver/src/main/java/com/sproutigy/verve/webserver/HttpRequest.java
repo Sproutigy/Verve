@@ -46,4 +46,6 @@ public interface HttpRequest extends AutoCloseable {
 
     @Nullable
     String getCookieValue(CharSequence name);
+
+    String getRemote();
 }

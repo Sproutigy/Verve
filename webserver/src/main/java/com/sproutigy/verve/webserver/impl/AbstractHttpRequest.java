@@ -76,4 +76,9 @@ public abstract class AbstractHttpRequest implements HttpRequest {
         }
         return null;
     }
+
+    @Override
+    public String getRemote() {
+        return null;
+    }
 }
