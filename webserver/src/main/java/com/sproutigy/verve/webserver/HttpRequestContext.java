@@ -54,7 +54,11 @@ public interface HttpRequestContext {
 
 
     static HttpRequestContext get() {
-        return threadLocalHttpContext.get();
+        HttpRequestContext context = threadLocalHttpContext.get();
+        if (context == null) {
+            throw new IllegalStateException("HttpRequestContext is not available in current context");
+        }
+        return context;
     }
 
     static void set(HttpRequestContext ctx) {
