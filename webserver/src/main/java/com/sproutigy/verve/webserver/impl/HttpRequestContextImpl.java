@@ -8,6 +8,8 @@ import com.sproutigy.commons.binary.Binary;
 import com.sproutigy.verve.module.Context;
 import com.sproutigy.verve.module.ContextImpl;
 import com.sproutigy.verve.webserver.*;
+import com.sproutigy.verve.webserver.actions.FinishWebAction;
+import com.sproutigy.verve.webserver.actions.RedirectWebAction;
 import com.sproutigy.verve.webserver.exceptions.HttpException;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -149,11 +151,16 @@ public class HttpRequestContextImpl implements Runnable, HttpRequestContext {
                 if (getResponse().isFinalized()) {
                     log.warn("There's returned object {} but response is already finalized {}", this, ret);
                 } else {
-                    if (ret == FINISH) {
+                    if (ret == FINISH || ret instanceof FinishWebAction) {
                         try {
                             getResponse().end();
                         } catch (IllegalStateException ignore) {
                         }
+                        return;
+                    }
+
+                    if (ret instanceof RedirectWebAction) {
+                        getResponse().redirect(((RedirectWebAction) ret).getUri());
                         return;
                     }
 
