@@ -62,6 +62,9 @@ public final class HttpUtil {
     }
 
     public static Cookie cookie(String name, @Nullable String value) {
+        if (value == null) {
+            value = "";
+        }
         return new DefaultCookie(name, value);
     }
 }

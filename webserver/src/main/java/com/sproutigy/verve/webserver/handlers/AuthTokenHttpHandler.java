@@ -65,7 +65,7 @@ public class AuthTokenHttpHandler implements HttpHandler {
 
     public static void setTokenCookie(HttpRequestContext ctx, String token, String path, boolean secure, boolean remember) {
         Cookie cookie = HttpUtil.cookie(COOKIE_NAME, token);
-        cookie.setPath("/");
+        cookie.setPath(path);
         cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         if (remember) {
@@ -74,10 +74,12 @@ public class AuthTokenHttpHandler implements HttpHandler {
         ctx.getResponse().setCookie(cookie);
     }
 
-    public static void removeTokenCookie(HttpRequestContext ctx) {
-        Cookie cookie = HttpUtil.cookie(COOKIE_NAME, null);
-        cookie.setPath("/");
-        ctx.getResponse().setCookie(cookie);
+    public static void removeTokenCookie(HttpRequestContext ctx, String path) {
+        Cookie cookie = ctx.getRequest().getCookie(COOKIE_NAME);
+        if (cookie != null) {
+            cookie.setPath(path);
+            ctx.getResponse().removeCookie(cookie);
+        }
     }
 
 }

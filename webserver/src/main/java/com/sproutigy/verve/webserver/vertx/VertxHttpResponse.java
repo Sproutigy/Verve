@@ -35,8 +35,14 @@ public class VertxHttpResponse extends AbstractHttpResponse {
     }
 
     @Override
-    public HttpResponse setHeader(CharSequence name, CharSequence value) {
+    public HttpResponse addHeader(CharSequence name, CharSequence value) {
         asVertxResponse().headers().add(name, value);
+        return this;
+    }
+
+    @Override
+    public HttpResponse setHeader(CharSequence name, CharSequence value) {
+        asVertxResponse().headers().set(name, value);
         return this;
     }
 

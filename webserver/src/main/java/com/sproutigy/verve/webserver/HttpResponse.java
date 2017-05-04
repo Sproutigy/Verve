@@ -9,11 +9,14 @@ public interface HttpResponse {
     HttpResponse status(int code);
     HttpResponse status(HttpResponseStatus status);
 
+    HttpResponse addHeader(CharSequence name, CharSequence value);
     HttpResponse setHeader(CharSequence name, CharSequence value);
     HttpResponse setHeaderIfNotSet(CharSequence name, CharSequence value);
 
     HttpResponse setCookie(Cookie cookie);
     HttpResponse setCookie(String cookie);
+    HttpResponse removeCookie(Cookie cookie);
+    HttpResponse removeCookie(String cookieName, String path);
 
     Promise<Void> sendFile(String filePath);
 

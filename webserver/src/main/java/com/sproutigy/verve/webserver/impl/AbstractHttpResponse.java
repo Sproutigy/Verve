@@ -5,6 +5,7 @@ import com.sproutigy.verve.webserver.HttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 import io.vertx.core.http.HttpHeaders;
 
@@ -25,6 +26,24 @@ public abstract class AbstractHttpResponse implements HttpResponse {
     @Override
     public HttpResponse setCookie(String cookie) {
         return setHeader(HttpHeaders.SET_COOKIE, cookie);
+    }
+
+    @Override
+    public HttpResponse removeCookie(Cookie cookie) {
+        if (cookie != null) {
+            cookie.setValue("");
+            cookie.setMaxAge(0);
+            return setCookie(cookie);
+        }
+        return this;
+    }
+
+    @Override
+    public HttpResponse removeCookie(String cookieName, String path) {
+        DefaultCookie cookie = new DefaultCookie(cookieName, "");
+        cookie.setPath(path);
+        removeCookie(cookie);
+        return this;
     }
 
     @Override
