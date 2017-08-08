@@ -73,10 +73,6 @@ public class HttpServer implements AutoCloseable {
     }
 
     public Promise<Void> start(Integer port, String contextPath) {
-        if (routeProvider != null) {
-            throw new IllegalStateException("Route Provider not set");
-        }
-
         if (port != null) {
             getVertxHttpServer().setPort(port);
         }
