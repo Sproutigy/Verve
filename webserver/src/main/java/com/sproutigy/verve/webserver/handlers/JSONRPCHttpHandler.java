@@ -169,7 +169,7 @@ public class JSONRPCHttpHandler implements HttpHandler {
                 throw new BadRequestHttpException();
             }
 
-            if (!isAllowedGET(method)) {
+            if (Modifier.isPublic(method.getModifiers()) && !isAllowedGET(method)) {
                 throw new MethodNotAllowedHttpException();
             }
 
