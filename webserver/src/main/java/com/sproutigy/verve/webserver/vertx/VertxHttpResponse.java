@@ -79,7 +79,7 @@ public class VertxHttpResponse extends AbstractHttpResponse {
                     setHeaderIfNotSet(HttpHeaders.CONTENT_LENGTH, Long.toString(data.length()));
                 }
                 finalized = true;
-                asVertxResponse().end(Buffer.buffer(data.asByteArray()));
+                asVertxResponse().end(Buffer.buffer(data.asByteArray(false)));
             } else {
                 end();
             }
