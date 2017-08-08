@@ -60,6 +60,11 @@ public class ResourceTreeNode extends ResourceDecorator {
 
     @Override
     public Iterable<? extends ResourceTreeNode> getChildren() throws IOException {
+        return getChildren(false);
+    }
+
+    @Override
+    public Iterable<? extends ResourceTreeNode> getChildren(boolean withHidden) throws IOException {
         Collection<ResourceTreeNode> children = new LinkedList<>();
         for (Resource resource : super.getChildren()) {
             children.add(wrapInternal(resource, resource.getName()));

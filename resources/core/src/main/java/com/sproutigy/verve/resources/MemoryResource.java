@@ -1,11 +1,6 @@
 package com.sproutigy.verve.resources;
 
-import com.sproutigy.commons.binary.Binary;
-import com.sproutigy.commons.binary.BinaryBuilder;
-
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -14,7 +9,6 @@ public class MemoryResource extends AbstractResource {
     private String name;
     private String descriptor;
     private Resource parent;
-    private Binary data = Binary.EMPTY;
     private List<Resource> children = new CopyOnWriteArrayList<>();
 
     public MemoryResource(String name) {
@@ -66,34 +60,13 @@ public class MemoryResource extends AbstractResource {
         return children;
     }
 
+    @Override
+    public Iterable<? extends Resource> getChildren(boolean withHidden) throws IOException {
+        return children;
+    }
+
     public void setChildren(List<Resource> children) {
         this.children = children;
     }
 
-    @Override
-    public InputStream getInputStream(ReadOption... options) throws IOException {
-        return data.asStream();
-    }
-
-    @Override
-    public OutputStream getOutputStream(WriteOption... options) throws IOException {
-        BinaryBuilder builder = new BinaryBuilder() {
-            @Override
-            public void close() throws IOException {
-                super.close();
-                MemoryResource.this.data = build();
-            }
-        };
-        return builder;
-    }
-
-    @Override
-    public Binary getData() throws IOException {
-        return data;
-    }
-
-    @Override
-    public void setData(Binary binary) throws IOException {
-        this.data = binary;
-    }
 }

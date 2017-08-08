@@ -92,22 +92,20 @@ public class URLResource extends AbstractResource {
     }
 
     @Override
-    public InputStream getInputStream(ReadOption... options) throws IOException {
-        return url.openStream();
+    public boolean hasData() {
+        return true;
     }
 
     @Override
-    public OutputStream getOutputStream(WriteOption... options) throws IOException {
-        URLConnection connection = url.openConnection();
-        connection.setDoOutput(true);
-        return connection.getOutputStream();
+    public DataAccess data() {
+        return new URLDataAccess(url);
     }
 
     @Override
-    public Iterable<Resource> getChildren() throws IOException {
+    public Iterable<? extends Resource> getChildren(boolean withHidden) throws IOException {
         Optional<File> localFile = toLocalFile();
         if (localFile.isPresent()) {
-            return new FileResource(localFile.get()).getChildren();
+            return new FileResource(localFile.get()).getChildren(withHidden);
         }
         throw new ChildrenNotAvailableResourceException();
     }

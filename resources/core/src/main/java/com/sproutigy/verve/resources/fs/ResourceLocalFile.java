@@ -32,7 +32,7 @@ public class ResourceLocalFile implements Closeable {
                     tempFile = Files.createTempFile(prefix, suffix).toFile();
                     tempFile.deleteOnExit();
 
-                    try (InputStream stream = resource.getInputStream()) {
+                    try (InputStream stream = resource.data().input()) {
                         FileOutputStream out = new FileOutputStream(tempFile);
                         try {
                             byte[] temp = new byte[32768];
@@ -58,7 +58,7 @@ public class ResourceLocalFile implements Closeable {
         if (tempFile != null && tempFile.exists()) {
             return new FileInputStream(tempFile);
         } else {
-            return resource.getInputStream();
+            return resource.data().input();
         }
     }
 

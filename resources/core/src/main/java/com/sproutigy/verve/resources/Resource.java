@@ -1,11 +1,9 @@
 package com.sproutigy.verve.resources;
 
-import com.sproutigy.commons.binary.Binary;
+import com.sproutigy.verve.resources.props.JSONProps;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -23,23 +21,25 @@ public interface Resource extends Iterable<Resource>, AutoCloseable {
     Resource getRoot() throws IOException;
 
     boolean create() throws IOException;
+    boolean createContainer() throws IOException;
+
     boolean exists() throws IOException;
 
     boolean isContainer();
     boolean isFile();
 
-    boolean hasChild(String name);
+    boolean hasChild(String name) throws IOException;
     Resource child(String name) throws IOException;
 
     boolean hasChildren();
     Iterable<? extends Resource> getChildren() throws IOException;
-
-    InputStream getInputStream(ReadOption... options) throws IOException;
-    OutputStream getOutputStream(WriteOption... options) throws IOException;
+    Iterable<? extends Resource> getChildren(boolean withHidden) throws IOException;
 
     boolean hasData();
-    Binary getData() throws IOException;
-    void setData(Binary binary) throws IOException;
+    DataAccess data();
+
+    boolean hasProps() throws IOException;
+    JSONProps props() throws IOException;
 
     boolean delete(DeleteOption... options) throws IOException;
 

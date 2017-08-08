@@ -4,7 +4,6 @@ import com.sproutigy.verve.resources.exceptions.InvalidResolvePathResourceExcept
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -50,11 +49,6 @@ public class ClassPathResource extends URLResource {
         } catch (InvalidResolvePathResourceException e) {
             return Optional.empty();
         }
-    }
-
-    @Override
-    public InputStream getInputStream(ReadOption... options) throws IOException {
-        return url.openStream();
     }
 
     @Override

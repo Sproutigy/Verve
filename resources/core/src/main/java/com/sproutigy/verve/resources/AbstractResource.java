@@ -1,25 +1,38 @@
 package com.sproutigy.verve.resources;
 
-import com.sproutigy.commons.binary.Binary;
+import com.sproutigy.verve.resources.exceptions.ChildrenNotAvailableResourceException;
 import com.sproutigy.verve.resources.exceptions.InvalidResolvePathResourceException;
+import com.sproutigy.verve.resources.props.DataAccessJSONProps;
+import com.sproutigy.verve.resources.props.JSONProps;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public abstract class AbstractResource implements Resource {
 
-    protected final Executor executor = Executors.newSingleThreadExecutor();
+    private static final String PROPS_FILENAME = ".props.json";
+
+    protected final Executor executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        private ThreadFactory parent = Executors.defaultThreadFactory();
+
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = parent.newThread(r);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     public AbstractResource() {
     }
@@ -79,18 +92,30 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
+    public boolean createContainer() throws IOException {
+        throw new IOException("Resource could not be created as a container");
+    }
+
+    @Override
     public boolean isContainer() {
         return hasChildren();
     }
 
     @Override
     public boolean hasChildren() {
-        return iterator().hasNext();
+        try {
+            return iterator().hasNext();
+        } catch (RuntimeException re) {
+            if (re.getCause() instanceof ChildrenNotAvailableResourceException) {
+                return false;
+            }
+            throw re;
+        }
     }
 
     @Override
-    public boolean hasChild(String name) {
-        for (Resource resource : this) {
+    public boolean hasChild(String name) throws IOException {
+        for (Resource resource : getChildren(true)) {
             if (Objects.equals(resource.getName(), name)) {
                 return true;
             }
@@ -107,26 +132,46 @@ public abstract class AbstractResource implements Resource {
     }
 
     @Override
-    public OutputStream getOutputStream(WriteOption... options) throws IOException {
-        throw new IOException("Resource is unmodifiable");
-    }
-
-    @Override
     public boolean hasData() {
-        return isFile();
+        return false;
     }
 
     @Override
-    public Binary getData() throws IOException {
-        try (InputStream inputStream = getInputStream(ReadOption.LOCK)) {
-            return Binary.from(inputStream);
+    public DataAccess data() {
+        return null; //TODO
+    }
+
+    @Override
+    public boolean hasProps() throws IOException {
+        if (!exists()) {
+            return false;
+        }
+
+        if (isContainer()) {
+            return hasChild(PROPS_FILENAME);
+        } else {
+            if (!hasParent()) {
+                return false;
+            }
+            return getParent().get().hasChild(getName() + PROPS_FILENAME);
         }
     }
 
     @Override
-    public void setData(Binary binary) throws IOException {
-        try (OutputStream outputStream = getOutputStream(WriteOption.ATOMIC, WriteOption.LOCK, WriteOption.SYNC_DATA_AND_META)) {
-            binary.toStream(outputStream);
+    public JSONProps props() throws IOException {
+        if (!exists()) {
+            throw new IOException("Cannot fetch props of non-existing resource");
+        }
+
+        if (isContainer()) {
+            return new DataAccessJSONProps(child(PROPS_FILENAME).data());
+        } else {
+            if (!hasParent()) {
+                throw new IOException("No parent - cannot fetch props");
+            }
+
+            Resource propsResource = getParent().get().child(getName() + PROPS_FILENAME);
+            return new DataAccessJSONProps(propsResource.data());
         }
     }
 
@@ -181,7 +226,11 @@ public abstract class AbstractResource implements Resource {
     @Override
     public Iterator<Resource> iterator() {
         try {
-            return (Iterator<Resource>)getChildren().iterator();
+            try {
+                return (Iterator<Resource>) getChildren().iterator();
+            } catch (ChildrenNotAvailableResourceException noChildren) {
+                return Collections.emptyIterator();
+            }
         } catch (IOException e) {
             throw new RuntimeException("Could not iterate children resources", e);
         }
@@ -224,6 +273,11 @@ public abstract class AbstractResource implements Resource {
         }
     }
 
+    @Override
+    public Iterable<? extends Resource> getChildren() throws IOException {
+        return getChildren(false);
+    }
+
     protected Resource resolveChild(String name) throws IOException {
         throw new IOException("Could not resolve child resource");
     }
@@ -240,6 +294,16 @@ public abstract class AbstractResource implements Resource {
     @Override
     public void close() throws Exception {
 
+    }
+
+    protected boolean isSpecialChildName(String childName) {
+        if (childName.endsWith(PROPS_FILENAME)) {
+            return true;
+        }
+        if (childName.startsWith(".~")) {
+            return true;
+        }
+        return false;
     }
 
 }

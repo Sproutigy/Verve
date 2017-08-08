@@ -1,11 +1,9 @@
 package com.sproutigy.verve.resources;
 
-import com.sproutigy.commons.binary.Binary;
+import com.sproutigy.verve.resources.props.JSONProps;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
@@ -52,6 +50,11 @@ public abstract class ResourceDecorator implements Resource {
     }
 
     @Override
+    public boolean createContainer() throws IOException {
+        return resource.createContainer();
+    }
+
+    @Override
     public boolean exists() throws IOException {
         return resource.exists();
     }
@@ -67,7 +70,7 @@ public abstract class ResourceDecorator implements Resource {
     }
 
     @Override
-    public boolean hasChild(String name) {
+    public boolean hasChild(String name) throws IOException {
         return resource.hasChild(name);
     }
 
@@ -87,13 +90,8 @@ public abstract class ResourceDecorator implements Resource {
     }
 
     @Override
-    public InputStream getInputStream(ReadOption... options) throws IOException {
-        return resource.getInputStream(options);
-    }
-
-    @Override
-    public OutputStream getOutputStream(WriteOption... options) throws IOException {
-        return resource.getOutputStream(options);
+    public Iterable<? extends Resource> getChildren(boolean withHidden) throws IOException {
+        return resource.getChildren(withHidden);
     }
 
     @Override
@@ -102,13 +100,18 @@ public abstract class ResourceDecorator implements Resource {
     }
 
     @Override
-    public Binary getData() throws IOException {
-        return resource.getData();
+    public DataAccess data() {
+        return resource.data();
     }
 
     @Override
-    public void setData(Binary binary) throws IOException {
-        resource.setData(binary);
+    public boolean hasProps() throws IOException {
+        return resource.hasProps();
+    }
+
+    @Override
+    public JSONProps props() throws IOException {
+        return resource.props();
     }
 
     @Override
