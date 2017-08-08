@@ -106,14 +106,17 @@ public class VertxHttpServer implements AutoCloseable, Handler<HttpServerRequest
             stopDeferred = Promise.defer();
             instance = this;
             getVertx().deployVerticle(VertxHttpServerVerticle.class.getName(), verticleDeploymentOptions, event -> {
-                if (event.succeeded()) {
-                    verticleDeploymentId = event.result();
-                    startDeferred.resolve(null);
-                    log.info("Started HTTP Server on port " + serverOptions.getPort());
-                } else {
-                    try {
-                        startDeferred.reject(event.cause());
-                    } catch(IllegalStateException ignore) { }
+                if (!startDeferred.getPromise().isDone()) {
+                    if (event.succeeded()) {
+                        verticleDeploymentId = event.result();
+                        startDeferred.resolve(null);
+                        log.info("Started HTTP Server on port " + serverOptions.getPort());
+                    } else {
+                        try {
+                            startDeferred.reject(event.cause());
+                        } catch (IllegalStateException ignore) {
+                        }
+                    }
                 }
             });
         } else {
