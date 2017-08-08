@@ -13,7 +13,7 @@
     <artifactId>verve-demo</artifactId>
 
     <properties>
-        <start-class>com.sproutigy.verve.VerveQuickstart</start-class>
+        <start-class>com.sproutigy.verve.demo.Main</start-class>
     </properties>
 
     <dependencies>
