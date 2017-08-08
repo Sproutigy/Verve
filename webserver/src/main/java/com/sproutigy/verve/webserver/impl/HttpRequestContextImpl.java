@@ -9,7 +9,7 @@ import com.sproutigy.verve.module.Context;
 import com.sproutigy.verve.module.ContextImpl;
 import com.sproutigy.verve.webserver.*;
 import com.sproutigy.verve.webserver.actions.FinishWebAction;
-import com.sproutigy.verve.webserver.actions.RedirectWebAction;
+import com.sproutigy.verve.webserver.actions.WebAction;
 import com.sproutigy.verve.webserver.exceptions.HttpException;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -148,19 +148,19 @@ public class HttpRequestContextImpl implements Runnable, HttpRequestContext {
 
         try {
             if (ret != null && ret != PROCEED) {
-                if (getResponse().isFinalized()) {
-                    log.warn("There's returned object {} but response is already finalized {}", this, ret);
-                } else {
-                    if (ret == FINISH || ret instanceof FinishWebAction) {
-                        try {
-                            getResponse().end();
-                        } catch (IllegalStateException ignore) {
-                        }
-                        return;
+                if (ret == FINISH || ret instanceof FinishWebAction) {
+                    try {
+                        getResponse().end();
+                    } catch (IllegalStateException ignore) {
                     }
+                    return;
+                }
 
-                    if (ret instanceof RedirectWebAction) {
-                        getResponse().redirect(((RedirectWebAction) ret).getUri());
+                if (getResponse().isFinalized()) {
+                    log.warn("Response of {} is already finalized, cannot respond", this);
+                } else {
+                    if (ret instanceof WebAction) {
+                        ((WebAction)ret).execute(this);
                         return;
                     }
 
