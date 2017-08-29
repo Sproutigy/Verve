@@ -25,7 +25,9 @@ public interface HttpRequestContext {
     void thrown(Throwable throwable);
 
     Promise<Binary> fetchData();
+    Promise<Binary> fetchData(long limit);
     <T> Promise<T> fetchDataAs(Class<T> clazz);
+    <T> Promise<T> fetchDataAs(Class<T> clazz, long limit);
 
     void sendObject(Object o);
 

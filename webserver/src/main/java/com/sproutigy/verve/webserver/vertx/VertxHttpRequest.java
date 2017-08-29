@@ -6,10 +6,12 @@ import com.sproutigy.commons.binary.Binary;
 import com.sproutigy.commons.binary.BinaryBuilder;
 import com.sproutigy.verve.webserver.HttpRequest;
 import com.sproutigy.verve.webserver.impl.AbstractHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.Collection;
 
 public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest {
@@ -50,7 +52,7 @@ public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest
     }
 
     @Override
-    public Promise<Binary> fetchData() {
+    public Promise<Binary> fetchData(long limit) {
         synchronized (this) {
             if (dataDeferred != null) {
                 return dataDeferred.getPromise();
@@ -63,7 +65,19 @@ public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest
         try {
             HttpServerRequest req = asVertxRequest();
             req.pause();
-            req.handler(buffer -> binaryBuilder.append(buffer.getBytes()));
+            req.handler(buffer -> {
+                if (limit > 0 && binaryBuilder.length() + buffer.length() > limit) {
+                    binaryBuilder.append(buffer.getBytes());
+                } else {
+                    try {
+                        binaryBuilder.close();
+                    } catch (IOException e) {
+                    }
+
+                    req.response().setStatusCode(HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE.code());
+                    req.response().close();
+                }
+            });
             req.endHandler(aVoid -> dataDeferred.resolve(binaryBuilder.build()));
             req.exceptionHandler(cause -> dataDeferred.reject(cause));
             req.resume();

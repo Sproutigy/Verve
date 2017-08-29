@@ -1,5 +1,7 @@
 package com.sproutigy.verve.webserver.impl;
 
+import com.sproutigy.commons.async.Promise;
+import com.sproutigy.commons.binary.Binary;
 import com.sproutigy.verve.webserver.HttpRequest;
 import com.sproutigy.verve.webserver.exceptions.BadRequestHttpException;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -20,6 +22,11 @@ public abstract class AbstractHttpRequest implements HttpRequest {
             throw new BadRequestHttpException();
         }
         return value;
+    }
+
+    @Override
+    public Promise<Binary> fetchData() {
+        return fetchData(0);
     }
 
     @Override

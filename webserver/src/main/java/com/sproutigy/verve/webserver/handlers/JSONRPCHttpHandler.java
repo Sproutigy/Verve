@@ -21,6 +21,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
@@ -75,6 +76,9 @@ public class JSONRPCHttpHandler implements HttpHandler {
     private ConcurrentHashMap<String, Method> methods = new ConcurrentHashMap<>();
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
+
+    @Getter @Setter
+    private long payloadLimit = 1024*1024; // 1 MB
 
     private static Collection<String> UNCALLABLE_METHODS = new HashSet<>();
     static {
@@ -182,7 +186,7 @@ public class JSONRPCHttpHandler implements HttpHandler {
 
             Deferred deferred = Promise.defer();
 
-            FutureWatch.listen(req.fetchData(), (result, data, cause) -> {
+            FutureWatch.listen(req.fetchData(payloadLimit), (result, data, cause) -> {
                 if (result.isSuccess()) {
                     String methodName;
                     JsonNode jsonParams;

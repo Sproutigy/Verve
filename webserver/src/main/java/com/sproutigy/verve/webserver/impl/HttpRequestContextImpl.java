@@ -121,13 +121,23 @@ public class HttpRequestContextImpl implements Runnable, HttpRequestContext {
 
     @Override
     public Promise<Binary> fetchData() {
-        return request.fetchData();
+        return fetchData(0);
+    }
+
+    @Override
+    public Promise<Binary> fetchData(long limit) {
+        return getRequest().fetchData(limit);
     }
 
     @Override
     public <T> Promise<T> fetchDataAs(Class<T> clazz) {
+        return fetchDataAs(clazz, 0);
+    }
+
+    @Override
+    public <T> Promise<T> fetchDataAs(Class<T> clazz, long limit) {
         Deferred<T> deferred = Promise.defer();
-        FutureWatch.listen(getRequest().fetchData(), (result, value, cause) -> {
+        FutureWatch.listen(getRequest().fetchData(limit), (result, value, cause) -> {
             if (result.isSuccess()) {
                 try {
                     T obj = deserialize(value, clazz);

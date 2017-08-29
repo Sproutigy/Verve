@@ -26,6 +26,8 @@ public interface HttpRequest extends AutoCloseable {
 
     Promise<Binary> fetchData();
 
+    Promise<Binary> fetchData(long limit);
+
 
     String getQueryString();
 
