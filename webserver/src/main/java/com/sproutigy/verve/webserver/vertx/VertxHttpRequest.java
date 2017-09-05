@@ -5,6 +5,7 @@ import com.sproutigy.commons.async.Promise;
 import com.sproutigy.commons.binary.Binary;
 import com.sproutigy.commons.binary.BinaryBuilder;
 import com.sproutigy.verve.webserver.HttpRequest;
+import com.sproutigy.verve.webserver.exceptions.RequestEntityTooLargeHttpException;
 import com.sproutigy.verve.webserver.impl.AbstractHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
@@ -66,7 +67,7 @@ public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest
             HttpServerRequest req = asVertxRequest();
             req.pause();
             req.handler(buffer -> {
-                if (limit > 0 && binaryBuilder.length() + buffer.length() > limit) {
+                if (limit == 0 || (binaryBuilder.length() + buffer.length() <= limit)) {
                     binaryBuilder.append(buffer.getBytes());
                 } else {
                     try {
@@ -76,6 +77,7 @@ public class VertxHttpRequest extends AbstractHttpRequest implements HttpRequest
 
                     req.response().setStatusCode(HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE.code());
                     req.response().close();
+                    dataDeferred.reject(new RequestEntityTooLargeHttpException());
                 }
             });
             req.endHandler(aVoid -> dataDeferred.resolve(binaryBuilder.build()));
