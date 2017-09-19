@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 public interface HttpRequestContext {
     Object FINISH = new Object();
     Object PROCEED = new Object();
+    Object HANDLED = new Object();
 
     default Object finish() {
         return FINISH;
@@ -18,6 +19,10 @@ public interface HttpRequestContext {
 
     default Object proceed() {
         return PROCEED;
+    }
+
+    default Object handled() {
+        return HANDLED;
     }
 
     String getContextPath();

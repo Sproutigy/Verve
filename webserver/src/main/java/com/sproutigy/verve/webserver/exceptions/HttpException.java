@@ -30,4 +30,12 @@ public class HttpException extends Exception {
         this.statusCode = statusCode;
         this.statusText = statusText;
     }
+
+    @Override
+    public String toString() {
+        if (getStatusText() != null && !getStatusText().isEmpty()) {
+            return getStatusCode() + " " + getStatusText();
+        }
+        return getStatusCode() + "";
+    }
 }

@@ -107,8 +107,10 @@ public class HttpRequestContextImpl implements Runnable, HttpRequestContext {
 
     @Override
     public void thrown(Throwable throwable) {
-        log.warn("HTTP exception thrown within request {}", request, throwable);
         if (throwable instanceof HttpException) {
+            HttpException httpException = ((HttpException) throwable);
+            String trace = throwable.getStackTrace()[0].toString();
+            log.debug("HTTP {} thrown within request {} at {}", httpException, request, trace);
             getResponse().status(((HttpException) throwable).getStatusCode()).end();
         } else {
             log.error("Unhandled exception thrown within request {}", request, throwable);
@@ -154,6 +156,8 @@ public class HttpRequestContextImpl implements Runnable, HttpRequestContext {
 
     @SuppressWarnings("unchecked")
     private void handleReturnedObject(Object ret) {
+        if (ret == HANDLED) return;
+
         HttpRequestContext.set(this);
 
         try {
