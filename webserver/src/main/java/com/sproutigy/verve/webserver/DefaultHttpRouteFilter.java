@@ -57,7 +57,10 @@ public class DefaultHttpRouteFilter implements HttpRouteFilter {
         if (methods == null || methods.size() == 0 || methods.contains(req.getMethod())) {
             if (pathPatterns != null && pathPatterns.size() > 0) {
                 for (PathPattern pathPattern : pathPatterns) {
-                    return pathPattern.matchParams(req.getContextualPath());
+                    Map<String, String> matchParams = pathPattern.matchParams(req.getContextualPath());
+                    if (matchParams != null) {
+                        return matchParams;
+                    }
                 }
             } else {
                 return Collections.emptyMap();
