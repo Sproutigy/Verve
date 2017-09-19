@@ -48,8 +48,13 @@ public final class PathPattern {
 
             String paramName = ret.substring(idx + 2, ending);
 
-            String regex = "/(?<" + paramName + ">" + (greedy ? ".*" : "[^/]+") + ")";
-
+            String regex;
+            if (!paramName.isEmpty()) {
+                regex = "/(?<" + paramName + ">" + (greedy ? ".*" : "[^/]+") + ")";
+            }
+            else {
+                regex = "/(" + (greedy ? ".*" : "[^/]+") + ")";
+            }
             ret = ret.substring(0, idx) + regex + ret.substring(ending);
         }
 
