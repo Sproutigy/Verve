@@ -75,12 +75,19 @@ public final class VertxUtil {
 
     public static String describeRequest(HttpServerRequest request) {
         StringBuilder builder = new StringBuilder();
-        builder.append(request.method().name()).append(" ").append(request.path());
+        if (request.method() != null) {
+            builder.append(request.method().name()).append(' ');
+        }
+        if (request.path() != null) {
+            builder.append(request.path());
+        }
         if (request.query() != null) {
             builder.append("?");
             builder.append(request.query());
         }
-        builder.append(" [" + request.remoteAddress().host() + "]");
+        if (request.remoteAddress() != null && request.remoteAddress().host() != null) {
+            builder.append(" [").append(request.remoteAddress().host()).append("]");
+        }
         return builder.toString();
     }
 
